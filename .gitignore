@@ -1,0 +1,25 @@
+# Env & Secrets 
+
+.env
+.env.*
+.env.dev
+.env.production
+
+venv/
+
+# Working Folders 
+
+/Working
+
+# dbt generated / local-only artifacts 
+
+dbt_packages/
+logs/
+target/
+
+# OS & Editors 
+
+.vscode/
+
+
+

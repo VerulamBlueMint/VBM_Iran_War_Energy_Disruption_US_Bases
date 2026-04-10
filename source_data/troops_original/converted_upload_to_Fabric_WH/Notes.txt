@@ -1,0 +1,35 @@
+Dataset: DoD Military and Civilian Personnel by Location (Quarterly Update)
+This dataset provides a snapshot of assigned military and civilian personnel within the Department of Defense, broken down by their location (state/country), service, and agency.
+
+Data Source & Date
+
+Source: Defense Manpower Data Center (DMDC)
+
+Report: Military and Civilian Personnel by Service/Agency by State/Country (Updated Quarterly)
+
+Data Snapshot Date: December 31, 2025
+
+Access: The source data is publicly available from DMDC at: https://dwp.dmdc.osd.mil/dwp/app/dod-data-reports/workforce-reports
+
+About DMDC
+The Defense Manpower Data Center (DMDC) is the central source for identifying, authenticating, and providing information on DoD personnel. It supports joint information sharing on human resource issues and provides access to information on entitlements, benefits, and medical readiness for service members, veterans, and their families.
+
+Important Notes on Data Coverage & Methodology
+
+Personnel Counted: This table represents assigned personnel.
+
+Military: Location is based on the member's Assigned Unit State and Country Code.
+
+Civilians: Location is based on the employee's Duty Station State and Country Code.
+
+Inclusions: The data includes personnel assigned to the State Department and U.S. Embassies overseas.
+
+Exclusions & Limitations:
+
+This table does not include personnel on temporary duty (TDY) or those deployed in support of contingency operations.
+
+APF DoD Civilian (Appropriated Fund) numbers do not include the Defense Logistics Agency (DLA), as their data was not submitted for this period.
+
+APF DoD Civilian numbers do not include 11 civilians whose agency code was undetermined.
+
+Data Format: This dataset is derived from the unclassified version of the DMDC quarterly report. The original report is typically structured as a table with columns for State/Country, Service/Agency, and counts of military and civilian personnel.

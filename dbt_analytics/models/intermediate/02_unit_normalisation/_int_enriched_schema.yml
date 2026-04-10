@@ -1,0 +1,32 @@
+version: 2
+# Intermediate enriched models apply the final numeric enrichment step on top
+# of the canonical mapped models. Only the two GEM models require enrichment.
+# The three military models feed directly into the mart layer from the mapped tier.
+#
+# Production and reserves volumes are standardised consistently:
+#  - Oil volumes are converted to bbl/day for production and bbl for reserves.
+#  - Gas volumes are converted to MWh/day for production and MWh for reserves
+#    using a standard heating value of 0.01056 MWh per m3.
+#  - BOE records are retained without conversion.
+#
+# The original quantity_converted and units_converted columns are retained
+# for traceability alongside the new standardised columns.
+models:
+  - name: int_gem_production_enriched
+    description: "Enriched production model. Adds standardised daily production quantities for pricing. Oil volumes are converted to bbl/day and gas volumes are converted to MWh/day. BOE records are passed through unchanged. Chains via ref() from int_gem_production_mapped."
+    columns:
+      - name: units_standardised
+        description: "Standardised unit derived from units_converted_canonical_mapped. Values are bbl/day for million_bbl_per_year, MWh/day for million_cubic_meters_per_year, and boe/y for million_boe_per_year."
+      - name: quantity_standardised
+        description: "Production quantity converted to the standardised unit. million bbl/y -> bbl/day (x1,000,000 / 365); million m3/y -> MWh/day (x1,000,000 x 0.01056 / 365); million boe/y -> unchanged."
+        tests:
+          - not_null
+  - name: int_gem_reserves_enriched
+    description: "Enriched reserves model. Adds standardised total reserves quantities for pricing. Oil volumes are converted to bbl and gas volumes are converted to MWh. BOE records are passed through unchanged. Chains via ref() from int_gem_reserves_mapped."
+    columns:
+      - name: units_standardised
+        description: "Standardised unit derived from units_converted_canonical_mapped. Values are bbl for million_bbl, MWh for million_cubic_meters, and boe for million_boe."
+      - name: quantity_standardised
+        description: "Reserves quantity converted to the standardised unit. million bbl -> bbl (x1,000,000); million m3 -> MWh (x1,000,000 x 0.01056); million boe -> unchanged."
+        tests:
+          - not_null

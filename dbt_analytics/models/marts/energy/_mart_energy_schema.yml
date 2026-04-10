@@ -1,0 +1,129 @@
+version: 2
+
+# Energy mart models. Materialised as tables in dbt_dev_mart.
+# Two independent fact tables share dim_energy_field and dim_fuel_type via field_key and fuel_key.
+# dim_reserves_classification is exclusive to fact_energy_reserves.
+# Surrogate keys generated via dbt_utils.generate_surrogate_key().
+# No joins are made between the energy schema and the military schema.
+
+models:
+
+  - name: dim_energy_field
+    description: "Field-level dimension shared across fact_energy_production and fact_energy_reserves. One row per energy field. Sourced from int_gem_fields_region_mapped."
+    columns:
+      - name: field_key
+        description: "Surrogate key generated from unit_id."
+      - name: unit_id
+        description: "Natural key from the GEM source. Links the three GEM source files together."
+      - name: unit_name
+        description: "Field name in Latin script."
+      - name: unit_name_local_script
+        description: "Field name in local script where available."
+      - name: country_area_canonical_mapped
+        description: "Canonical country or area name after geography mapping."
+      - name: region
+        description: "Geographic region. One of: us domestic, europe, middle east, indo-pacific, latin america, africa, other."
+      - name: subnational_unit
+        description: "Subnational administrative unit where available."
+      - name: production_type
+        description: "Production type (e.g. conventional, unconventional)."
+      - name: status
+        description: "Operational status of the field (e.g. operating, developing, proposed, retired)."
+      - name: status_detail
+        description: "Additional detail on operational status where available."
+      - name: status_year
+        description: "Year the current status was recorded."
+      - name: discovery_year
+        description: "Year the field was discovered."
+      - name: fid_year
+        description: "Year of final investment decision."
+      - name: production_start_year
+        description: "Year production began."
+      - name: operator
+        description: "Current field operator."
+      - name: onshore_offshore
+        description: "Indicates whether the field is onshore or offshore."
+      - name: latitude
+        description: "Latitude coordinate of the field centroid."
+      - name: longitude
+        description: "Longitude coordinate of the field centroid."
+      - name: location_accuracy
+        description: "Accuracy of the coordinate. Exact or approximate."
+      - name: basin
+        description: "Sedimentary basin the field belongs to where available."
+
+  - name: dim_fuel_type
+    description: "Fuel type dimension shared across fact_energy_production and fact_energy_reserves. One row per unique canonical fuel description. Sourced from a union of int_gem_production_region_mapped and int_gem_reserves_region_mapped."
+    columns:
+      - name: fuel_key
+        description: "Surrogate key generated from fuel_description."
+      - name: fuel_description
+        description: "Canonical fuel description (e.g. oil, gas, ngl, condensate)."
+
+  - name: dim_reserves_classification
+    description: "Reserves classification dimension exclusive to fact_energy_reserves. One row per unique canonical reserves classification. Sourced from int_gem_reserves_region_mapped."
+    columns:
+      - name: classification_key
+        description: "Surrogate key generated from reserves_classification."
+      - name: reserves_classification
+        description: "Canonical reserves classification code or scheme."
+
+  - name: fact_energy_production
+    description: "One row per energy field per fuel description per data year, recording the annual production volume. Sourced from int_gem_production_region_mapped."
+    columns:
+      - name: field_key
+        description: "Foreign key to dim_energy_field."
+      - name: fuel_key
+        description: "Foreign key to dim_fuel_type."
+      - name: unit_id
+        description: "Natural key from the GEM source. Retained for traceability."
+      - name: unit_name
+        description: "Field name. Retained for convenience."
+      - name: country_area_canonical_mapped
+        description: "Canonical country or area name. Retained for convenience."
+      - name: region
+        description: "Geographic region. Retained for convenience."
+      - name: fuel_description_canonical_mapped
+        description: "Canonical fuel description. Retained for convenience."
+      - name: units_converted_canonical_mapped
+        description: "Canonical unit of the converted quantity."
+      - name: quantity_original
+        description: "Production volume in original source units. Must not be summed across fields with different original units."
+      - name: units_original
+        description: "Original unit of measurement from the GEM source."
+      - name: quantity_converted_mbbl_per_year
+        description: "Annual production volume converted to million barrels per year. Primary analytical measure for production loss calculations."
+      - name: data_year
+        description: "Year the production data refers to."
+
+  - name: fact_energy_reserves
+    description: "One row per energy field per fuel description per reserves classification per data year, recording the estimated recoverable volume. Sourced from int_gem_reserves_region_mapped."
+    columns:
+      - name: field_key
+        description: "Foreign key to dim_energy_field."
+      - name: fuel_key
+        description: "Foreign key to dim_fuel_type."
+      - name: classification_key
+        description: "Foreign key to dim_reserves_classification."
+      - name: unit_id
+        description: "Natural key from the GEM source. Retained for traceability."
+      - name: unit_name
+        description: "Field name. Retained for convenience."
+      - name: country_area_canonical_mapped
+        description: "Canonical country or area name. Retained for convenience."
+      - name: region
+        description: "Geographic region. Retained for convenience."
+      - name: fuel_description_canonical_mapped
+        description: "Canonical fuel description. Retained for convenience."
+      - name: units_converted_canonical_mapped
+        description: "Canonical unit of the converted quantity."
+      - name: reserves_classification_canonical_mapped
+        description: "Canonical reserves classification. Retained for convenience."
+      - name: quantity
+        description: "Reserves volume in original source units. Must not be summed across fields with different original units."
+      - name: units
+        description: "Original unit of measurement from the GEM source."
+      - name: quantity_converted_mbbl
+        description: "Reserves volume converted to million barrels. Primary analytical measure for reserves destruction calculations."
+      - name: data_year
+        description: "Year the reserves data refers to."

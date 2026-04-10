@@ -1,0 +1,67 @@
+version: 2
+
+seeds:
+  - name: map_geography
+    description: "Maps raw country and state values from BSR, DMDC, and GEM to a single canonical form. Only values that require remapping are included - pass-through values are excluded. Resolves naming differences, article reordering, and special codes."
+    columns:
+      - name: raw_value
+        description: "The exact raw value as it appears in the standardised_txt staging view."
+        tests:
+          - not_null
+          - unique
+      - name: canonical_value
+        description: "The agreed canonical form. Special codes (us_zz-unknown, overseas_zz-unknown, armed forces europe, armed forces pacific) map to themselves and are handled as unresolvable in the intermediate layer."
+
+  - name: map_fuel_description
+    description: "Maps fuel description variants to 4 canonical fuel types - oil, gas, oil and gas, gas and condensate. Also maps all units_original and units_converted values from GEM production and reserves to SQL-safe canonical forms. Only values that require remapping are included."
+    columns:
+      - name: raw_value
+        description: "The exact raw fuel_description or units value as it appears in the standardised_txt staging view."
+        tests:
+          - not_null
+          - unique
+      - name: canonical_value
+        description: "Canonical fuel type or SQL-safe unit label. [not stated] maps to unknown."
+
+  - name: map_reserves_classification
+    description: "Maps reserves_classification values to canonical forms. Resolves Cyrillic characters to Latin equivalents. Only values that require remapping are included - pass-through values are excluded."
+    columns:
+      - name: raw_value
+        description: "The exact raw reserves_classification value as it appears in stg_gem_reserves_standardised_txt."
+        tests:
+          - not_null
+          - unique
+      - name: canonical_value
+        description: "Standardised classification value with consistent casing and Latin characters. [not stated] maps to unknown."
+
+  - name: map_region
+    description: "Maps canonical country and state values to one of seven geographic regions - us domestic, europe, middle east, indo_pacific, latin america, africa, other. Georgia appears twice - once for us domestic (the US state) and once for europe (the country) - resolved at query time using the location column in int_us_troops_region_mapped."
+    columns:
+      - name: canonical_value
+        description: "The canonical country or state value as it appears in the intermediate mapped models."
+        tests:
+          - not_null
+      - name: region
+        description: "Geographic region. One of: us domestic, europe, middle east, indo_pacific, latin america, africa, other."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["us domestic", "europe", "middle east", "indo_pacific", "latin america", "africa", "other"]
+
+  - name: map_country_centroids
+    description: "Maps canonical country_or_state values to representative centroid coordinates for map visualisation. Covers all values present in dim_geography including US states, overseas territories, and countries."
+    columns:
+      - name: canonical_value
+        description: "The canonical country_or_state value as it appears in dim_geography."
+        tests:
+          - not_null
+          - unique
+      - name: latitude
+        description: "Representative centroid latitude for the country or state."
+        tests:
+          - not_null
+      - name: longitude
+        description: "Representative centroid longitude for the country or state."
+        tests:
+          - not_null

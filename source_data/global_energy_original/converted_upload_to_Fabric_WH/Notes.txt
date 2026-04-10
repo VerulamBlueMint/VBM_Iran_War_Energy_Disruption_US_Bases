@@ -1,0 +1,23 @@
+Notes:
+
+Data is from Global Energy Monitor's Global Oil & Gas Extraction Tracker.
+
+This dataset includes oil and gas fields worldwide with their locations, reserves, and production volumes. Only field-level data is used—project-level data is excluded.
+
+Fields included:
+
+Field-level main data: provides coordinates and basic information (status, fuel type, country)
+
+Field-level reserves data: provides estimated recoverable volumes
+
+Field-level production data: provides annual production volumes (for calculating ongoing losses)
+
+All tables can be joined using Unit ID.
+
+The coordinates are approximate midpoints of fields, not exact boundaries. Location accuracy is noted as "exact" or "approximate" in the main data.
+
+Issue: The three Global_Oil_and_Gas_Extraction_Tracker_March_2026 files are loaded directly into Fabric Warehouse via Get Data rather than dbt seed. 
+This is due to a compatibility issue between dbt-fabric 1.9.8 and Microsoft Fabric's UTF-8 collation (Latin1_General_100_BIN2_UTF8), which rejects the text/ntext types that dbt's CSV parser (agate) infers for long string columns. 
+The column_types override in dbt_project.yml is not respected by this version of the adapter, making seeding these files unviable without a significant workaround. 
+The data contains Unicode characters (Arabic script) which compound this issue. Direct upload via Fabric's Get Data handles Unicode natively and avoids the ODBC encoding conflict entirely. 
+The trade-off of no version control is accepted for these raw source files at this stage.

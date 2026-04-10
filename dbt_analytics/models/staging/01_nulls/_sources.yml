@@ -1,0 +1,36 @@
+version: 2
+
+# =========================================
+# SOURCE DECLARATIONS - landing schema
+# =========================================
+#
+# All five source tables are loaded via Fabric Get Data.
+# GEM files require this approach due to a dbt-fabric 1.9.8 / UTF-8 collation incompatibility with Unicode content
+#
+# Known loading issue - BSR:
+# Seven columns landed with a leading space in the column name. Resolved in stg_us_bases.sql by aliasing to clean snake_case names.
+
+sources:
+  - name: landing
+    schema: dbt_dev_landing
+    tables:
+
+      - name: base_structure_report
+        description: "Base Structure Report FY25 - geocoded US military installation sites as of 30 September 2024. One row per site per component. Loaded via Fabric Get Data from Base_Structure_Report_FY25_with_lat_lon_converted."
+        identifier: Base_Structure_Report_FY25_with_lat_lon_converted
+
+      - name: dmdc_personnel
+        description: "DMDC Military and Civilian Personnel by Service/Agency by State/Country - snapshot as of 31 December 2025. Wide format - one row per location with one column per branch per component category. Loaded via Fabric Get Data from DMDC_Website_Location_Report_2512_converted."
+        identifier: DMDC_Website_Location_Report_2512_converted
+
+      - name: gem_main
+        description: "GEM Global Oil and Gas Extraction Tracker March 2026 - field-level main data. One row per energy field. Contains Unicode content (Arabic script) in unit_name_local_script. Loaded via Fabric Get Data from Global_Oil_and_Gas_Extraction_Tracker_March_2026_field_level_main_converted."
+        identifier: Global_Oil_and_Gas_Extraction_Tracker_March_2026_field_level_main_converted
+
+      - name: gem_production
+        description: "GEM Global Oil and Gas Extraction Tracker March 2026 - field-level production data. One row per field per fuel description per data year. Loaded via Fabric Get Data from Global_Oil_and_Gas_Extraction_Tracker_March_2026_field_level_production_converted."
+        identifier: Global_Oil_and_Gas_Extraction_Tracker_March_2026_field_level_production_converted
+
+      - name: gem_reserves
+        description: "GEM Global Oil and Gas Extraction Tracker March 2026 - field-level reserves data. One row per field per fuel description per reserves classification per data year. Loaded via Fabric Get Data from Global_Oil_and_Gas_Extraction_Tracker_March_2026_field_level_reserves_converted."
+        identifier: Global_Oil_and_Gas_Extraction_Tracker_March_2026_field_level_reserves_converted

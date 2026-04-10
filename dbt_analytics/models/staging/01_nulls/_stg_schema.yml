@@ -1,0 +1,107 @@
+version: 2
+
+# Staging models are materialised as views in dbt_dev_staging.
+# They apply only the cleaning decisions documented in
+# docs/profiling_findings.md. No business logic, no joins,
+# no surrogate keys at this layer.
+
+models:
+
+  - name: stg_us_bases
+    description: "Cleaned Base Structure Report. Ghost rows removed, leading space column names aliased, BARRIGADA grain violation resolved by aggregating two parcels into one row. One row per site per component."
+    columns:
+      - name: country_state
+        description: "State (US) or country (overseas) where the site is located."
+        tests:
+          - not_null
+      - name: site
+        description: "Site name as recorded in the BSR."
+        tests:
+          - not_null
+      - name: component
+        description: "Military component that owns the site."
+        tests:
+          - not_null
+      - name: plant_replacement_value_m
+        description: "Plant replacement value in USD millions."
+
+  - name: stg_us_troops
+    description: "Cleaned and unpivoted DMDC personnel data. Ghost rows removed. Wide format unpivoted to long format - one row per location per branch per component category. Null personnel counts set to zero."
+    columns:
+      - name: duty_state_country
+        description: "State (US) or country (overseas) - joins to stg_us_bases on country_state."
+        tests:
+          - not_null
+      - name: location
+        description: "Location group - United States or overseas."
+        tests:
+          - not_null
+      - name: branch
+        description: "Military branch or Fourth Estate."
+        tests:
+          - not_null
+      - name: component_category
+        description: "Active Duty, National Guard, Reserve, or DoD Civilian."
+        tests:
+          - not_null
+      - name: personnel_count
+        description: "Headcount of assigned personnel. Null source values set to zero."
+        tests:
+          - not_null
+
+  - name: stg_gem_main
+    description: "GEM field-level main data with standardised column names. No nulls in analytically critical columns. 618 null lat/lon rows retained - these fields will not render on the map layer."
+    columns:
+      - name: unit_id
+        description: "Natural key from GEM source - joins to stg_gem_production and stg_gem_reserves."
+        tests:
+          - not_null
+          - unique
+      - name: fuel_type
+        description: "Oil, gas, oil and gas, or NGL."
+        tests:
+          - not_null
+      - name: country_area
+        description: "Country where the field is located."
+        tests:
+          - not_null
+
+  - name: stg_gem_production
+    description: "GEM field-level production data with standardised column names. Null data years set to 2026 - year of source document per GEM field definition. Data year 2029 corrected to 2019 (typo)."
+    columns:
+      - name: unit_id
+        description: "Natural key - joins to stg_gem_main."
+        tests:
+          - not_null
+      - name: fuel_description
+        description: "Fuel type for this production record."
+        tests:
+          - not_null
+      - name: data_year
+        description: "Year the data refers to. Nulls set to 2026, 2029 corrected to 2019."
+        tests:
+          - not_null
+      - name: quantity_converted
+        description: "Production volume in million bbl/y - primary analytical measure."
+
+  - name: stg_gem_reserves
+    description: "GEM field-level reserves data with standardised column names. Null data years set to 2026 - year of source document per GEM field definition. Also resolves the two grain violations identified in profiling (L100000312399 and L100000312412)."
+    columns:
+      - name: unit_id
+        description: "Natural key - joins to stg_gem_main."
+        tests:
+          - not_null
+      - name: fuel_description
+        description: "Fuel type for this reserves record."
+        tests:
+          - not_null
+      - name: reserves_classification
+        description: "Classification code for this reserves estimate."
+        tests:
+          - not_null
+      - name: data_year
+        description: "Year the data refers to. Nulls set to 2026."
+        tests:
+          - not_null
+      - name: quantity_converted
+        description: "Recoverable reserves in million bbl - primary analytical measure."

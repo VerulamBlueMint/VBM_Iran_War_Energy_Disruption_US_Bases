@@ -1,0 +1,61 @@
+version: 2
+
+# Intermediate mapped models apply canonical mappings via left joins to seed
+# tables. All columns from the upstream standardised_txt model are passed
+# through unchanged. Canonical mapped columns are added alongside.
+# A coalesce ensures that if no mapping exists in the seed the raw value is
+# used as-is - the canonical_mapped column is never null for a non-null input.
+
+models:
+
+  - name: int_us_bases_mapped
+    description: "Canonical mappings applied to stg_us_bases_standardised_txt. country_state resolved via map_geography."
+    columns:
+      - name: country_state_canonical_mapped
+        description: "Canonical country or state name. Falls back to the raw standardised value if no mapping exists in map_geography."
+
+  - name: int_us_troops_mapped
+    description: "Canonical mappings applied to stg_us_troops_standardised_txt. duty_state_country resolved via map_geography."
+    columns:
+      - name: duty_state_country_canonical_mapped
+        description: "Canonical country or state name. Falls back to the raw standardised value if no mapping exists in map_geography."
+
+  - name: int_gem_fields_mapped
+    description: "Canonical mappings applied to stg_gem_main_standardised_txt. country_area resolved via map_geography."
+    columns:
+      - name: country_area_canonical_mapped
+        description: "Canonical country name. Falls back to the raw standardised value if no mapping exists in map_geography."
+
+  - name: int_gem_production_mapped
+    description: "Canonical mappings applied to stg_gem_production_standardised_txt. country_area resolved via map_geography. fuel_description and units_converted resolved via map_fuel_description."
+    columns:
+      - name: country_area_canonical_mapped
+        description: "Canonical country name. Falls back to the raw standardised value if no mapping exists in map_geography."
+      - name: fuel_description_canonical_mapped
+        description: "Canonical fuel type - oil, gas, oil and gas, gas and condensate, or unknown. Falls back to the raw standardised value if no mapping exists in map_fuel_description."
+        tests:
+          - accepted_values:
+              values: ["oil", "gas", "oil and gas", "gas and condensate", "unknown"]
+      - name: units_converted_canonical_mapped
+        description: "SQL-safe canonical unit label. Falls back to the raw standardised value if no mapping exists in map_fuel_description."
+        tests:
+          - accepted_values:
+              values: ["million_bbl_per_year", "million_boe_per_year", "million_cubic_meters_per_year"]
+
+  - name: int_gem_reserves_mapped
+    description: "Canonical mappings applied to stg_gem_reserves_standardised_txt. country_area resolved via map_geography. fuel_description and units_converted resolved via map_fuel_description. reserves_classification resolved via map_reserves_classification."
+    columns:
+      - name: country_area_canonical_mapped
+        description: "Canonical country name. Falls back to the raw standardised value if no mapping exists in map_geography."
+      - name: fuel_description_canonical_mapped
+        description: "Canonical fuel type - oil, gas, oil and gas, gas and condensate, or unknown. Falls back to the raw standardised value if no mapping exists in map_fuel_description."
+        tests:
+          - accepted_values:
+              values: ["oil", "gas", "oil and gas", "gas and condensate", "unknown"]
+      - name: units_converted_canonical_mapped
+        description: "SQL-safe canonical unit label. Falls back to the raw standardised value if no mapping exists in map_fuel_description."
+        tests:
+          - accepted_values:
+              values: ["million_bbl", "million_boe", "million_cubic_meters"]
+      - name: reserves_classification_canonical_mapped
+        description: "Canonical reserves classification with consistent casing and Latin characters. Falls back to the raw standardised value if no mapping exists in map_reserves_classification."

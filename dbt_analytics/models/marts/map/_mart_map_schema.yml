@@ -1,0 +1,24 @@
+version: 2
+
+# Map mart models. Materialised as tables in dbt_dev_mart.
+# This schema file covers two standalone helper tables used exclusively by the Power BI report:
+# - map_locations: used by the Azure Maps visuals
+# - dim_region: used as a disconnected region slicer table to drive cross-schema filtering
+
+models:
+
+  - name: map_locations
+    description: "Standalone map helper table combining all three coordinate datasets into a single table for use by the Azure Maps visuals in the Power BI report. One row per plotable location across military bases, energy fields, and troop locations. Sourced from a UNION of dim_site, dim_energy_field, and dim_geography. Has no relationships to any other table in the semantic model and must never be used in DAX calculations."
+    columns:
+      - name: category
+        description: "Location category. One of: Military Base, Energy Field, Troop Location. Drives the legend colour grouping on the Azure Maps visual. Military Base and Troop Location both render in #2563EB. Energy Field renders in #F97316."
+      - name: name
+        description: "Display name of the location shown in the map tooltip on hover. Sourced from dim_site[site] for military bases, dim_energy_field[unit_name] for energy fields, and dim_geography[country_or_state] for troop locations."
+      - name: latitude
+        description: "Latitude coordinate of the location. Must be set to Don't summarize in the Power BI semantic model after the table is loaded. Sourced from dim_site[latitude] for military bases, dim_energy_field[latitude] for energy fields, and dim_geography[latitude] for troop locations."
+      - name: longitude
+        description: "Longitude coordinate of the location. Must be set to Don't summarize in the Power BI semantic model after the table is loaded. Sourced from dim_site[longitude] for military bases, dim_energy_field[longitude] for energy fields, and dim_geography[longitude] for troop locations."
+      - name: region
+        description: "Region value sourced from the originating table. Inconsistent across categories - Military Base and Troop Location carry dim_geography region values; Energy Field carries dim_energy_field region values. Use military_region or energy_region instead for filtering."
+      - name: size_value
+        description: "Dot size score for the Azure Maps visual Size field well. Min-max normalised to 5-100 within each category independently, so Military Base dots are sized relative to other Military Base dots only, Energy Field dots relative to other Energy Field dots only, and Troop Location dots relative to other Troop Location dots only. Military Base: derived from SUM(fact_base_inventory[plant_replacement_value_m]) per site. Energy Field: derived from the dominant fuel type production row per field (highest quantity_converted_mbbl_per_year), one row per field, sourced from fact_energy_production. Troop Location: derived from SUM(fact_personnel_assignment[personnel_count]) filtered to location = overseas and snapshot_date = 2025-12-31. Edge case: where all values in a category are identical the score is 50. No dot scores below 5. Used exclusively in the Size field well on both Azure Maps visuals (Tab 1 and Tab 2). Must not be used in any DAX calculation or tooltip."

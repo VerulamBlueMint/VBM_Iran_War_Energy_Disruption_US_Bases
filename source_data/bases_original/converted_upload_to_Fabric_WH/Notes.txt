@@ -1,0 +1,48 @@
+Dataset: US Military Bases (Geocoded)
+This dataset is a geocoded version of the Base Structure Report (BSR) - FY25 Baseline , with data captured as of 30 September 2024.
+
+Source Data Overview:
+The Base Structure Report (BSR) is published annually by the Office of the Assistant Secretary of Defense for Energy, Installations, and Environment. This report represents a snapshot of the DoD real property inventory (RPI) as of 30 September 2024 in accordance with DoD Instruction 4165.14, “Real Property Inventory and Forecasting,” which supports the requirements of title 10, U.S. Code, section 2721, “Real Property Records.”
+
+The BSR is produced from the Real Property Assets Database (RPAD), an extract from the Data Analytics and Integration Support (DAIS) Platform. It represents the Military Departments' (MilDeps) native real property inventory data as reflected in their individual Accountable Property Systems of Record (APSR) as of 30 September. This report is for use in FY25. When using this report, it is important to understand that the physical real property infrastructure is dynamic and will naturally change throughout the year (new construction, demolitions, etc.). Since sites and assets continue to be listed in the BSR until they are legally removed from the inventory, it is not unusual to find unutilized assets in various stages of activity that are still reported while awaiting disposal.
+
+Inclusion Criteria (from source BSR):
+For a site to qualify for individual entry in the BSR, it must meet the following criteria:
+
+DoD sites in the United States: Must be larger than 10 acres AND have a Plant Replacement Value (PRV) greater than $10 million.
+
+DoD sites in US Territories or Foreign Countries: Must be larger than 10 acres OR have a PRV greater than $10 million.
+
+Army National Guard State Sites: Must be larger than 5 acres AND have a PRV greater than $5 million for individual entry.
+
+Sites not meeting these criteria are aggregated as “Other” locations within each state or country and are not included in this individual site listing. Sites that only have disposed assets or are assigned to Army Programmatic Installations are also excluded.
+
+Geocoding Methodology:
+The raw BSR is published as a tabular report and contains no geospatial data. To enable mapping, latitude and longitude coordinates were applied to as many individual sites listed in the report as possible using the following process:
+
+Coordinates were sourced from https://usbaseproject.com/ for the majority of sites.
+
+For any remaining sites without coordinates, Deepseek was used to research and apply the missing coordinates based on site names and locations.
+
+Data Organization (from source BSR):
+The original BSR is presented as an Excel Workbook with the following tabs:
+
+Federal Main Report: List of individual Federal sites based on the criteria above.
+
+Federal Other Sites: Count of Federal sites not captured in the individual listing.
+
+State Main Report: List of individual State sites (primarily Army National Guard) based on criteria.
+
+State Other Sites: Count of State sites not captured in the individual listing.
+
+Key Definitions (from source BSR):
+
+Site: A specific geographic location that has individual land parcels or facilities assigned to it. A site may be land only, facility/facilities only, or land with facilities.
+
+Installation: A military base, camp, post, station, yard, center, homeport facility, or other activity under the jurisdiction of the DoD. An installation may consist of one or more sites.
+
+Large Site: A site reported with acreage ≥ 100K Acres, OR Total Building Square Footage ≥ 4.5M Sq. Ft.
+
+Plant Replacement Value (PRV): The calculated cost to replace the current physical plant (buildings, structures, and linear structures) using today's construction costs and standards.
+
+Total Acres: The total number of acres at a site, including government-owned, public, leased, permitted, and foreign land used by DoD.

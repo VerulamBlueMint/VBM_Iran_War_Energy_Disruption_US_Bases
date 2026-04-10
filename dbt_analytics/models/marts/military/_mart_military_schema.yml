@@ -1,0 +1,93 @@
+version: 2
+
+# Military mart models. Materialised as tables in dbt_dev_mart.
+# Two star schemas share a conformed dim_geography dimension at state or country level.
+# Surrogate keys generated via dbt_utils.generate_surrogate_key().
+# fact_base_inventory snapshot date: 2024-09-30 (BSR FY25 baseline).
+# fact_personnel_assignment snapshot date: 2025-12-31 (DMDC quarterly report).
+
+models:
+
+  - name: dim_geography
+    description: "Conformed geographic dimension shared across fact_base_inventory and fact_personnel_assignment. One row per unique combination of country_or_state and region. Sourced from a union of int_us_bases_region_mapped and int_us_troops_region_mapped."
+    columns:
+      - name: geo_key
+        description: "Surrogate key generated from country_or_state and region."
+      - name: country_or_state
+        description: "Canonical geography name. May be a US state or a country name. Natural key joining to both military fact tables."
+      - name: region
+        description: "Geographic region. One of: us domestic, europe, middle east, indo-pacific, latin america, africa, other."
+      - name: is_domestic
+        description: "True where region is us domestic, false otherwise."
+
+  - name: dim_site
+    description: "Site-level dimension exclusive to fact_base_inventory. One row per military installation site. Carries site name, component, coordinates, and a foreign key to dim_geography."
+    columns:
+      - name: site_key
+        description: "Surrogate key generated from site, component, and country_state_canonical_mapped."
+      - name: geo_key
+        description: "Foreign key to dim_geography. Generated from country_state_canonical_mapped and region."
+      - name: site
+        description: "Site name as reported in the Base Structure Report."
+      - name: component
+        description: "Military component that owns or operates the site (e.g. Army Active, Navy Active, Air Force Active)."
+      - name: name_nearest_city
+        description: "Name of the nearest city to the site."
+      - name: latitude
+        description: "Latitude coordinate of the site."
+      - name: longitude
+        description: "Longitude coordinate of the site."
+      - name: lat_long_sources
+        description: "Source of the coordinate data. US Base Project or DeepSeek."
+
+  - name: dim_branch
+    description: "Branch and component category dimension exclusive to fact_personnel_assignment. One row per unique combination of branch and component category."
+    columns:
+      - name: branch_key
+        description: "Surrogate key generated from branch and component_category."
+      - name: branch
+        description: "Military branch (e.g. Army, Navy, Marine Corps, Air Force, Space Force, Coast Guard, Fourth Estate)."
+      - name: component_category
+        description: "Component category (Active Duty, National Guard, Reserve, DoD Civilian)."
+
+  - name: fact_base_inventory
+    description: "One row per military installation site per snapshot date, recording the physical infrastructure and plant replacement value of each qualifying DoD real property site. Snapshot date is 2024-09-30 per the BSR FY25 baseline."
+    columns:
+      - name: site_key
+        description: "Foreign key to dim_site."
+      - name: geo_key
+        description: "Foreign key to dim_geography."
+      - name: snapshot_date
+        description: "Snapshot date of the Base Structure Report. Hardcoded to 2024-09-30."
+      - name: count_building_owned
+        description: "Number of owned buildings on the site."
+      - name: building_owned_sqft
+        description: "Total owned building floor area in square feet."
+      - name: count_bldgs_leased
+        description: "Number of leased buildings on the site."
+      - name: bldgs_leased_sqft
+        description: "Total leased building floor area in square feet."
+      - name: count_bldgs_other
+        description: "Number of buildings under other tenure on the site."
+      - name: bldgs_other_sqft
+        description: "Total floor area under other tenure in square feet."
+      - name: acres_owned
+        description: "Government owned land area in acres."
+      - name: total_acres
+        description: "Total land area in acres including leased and permitted."
+      - name: plant_replacement_value_m
+        description: "Plant replacement value in USD millions. Primary financial measure and basis for base destruction loss calculation."
+
+  - name: fact_personnel_assignment
+    description: "One row per country or state per location group per branch per component category per snapshot date, recording the headcount of US military and civilian personnel assigned to that location. Snapshot date is 2025-12-31 per the DMDC quarterly report."
+    columns:
+      - name: geo_key
+        description: "Foreign key to dim_geography."
+      - name: branch_key
+        description: "Foreign key to dim_branch."
+      - name: location
+        description: "Location group as reported by DMDC. Either united states or overseas."
+      - name: snapshot_date
+        description: "Snapshot date of the DMDC personnel report. Hardcoded to 2025-12-31."
+      - name: personnel_count
+        description: "Headcount of assigned personnel for this branch and component category at this location and location group. Semi-additive across time. Do not sum across location groups for Georgia, Guam, and Puerto Rico without acknowledging the double-count."

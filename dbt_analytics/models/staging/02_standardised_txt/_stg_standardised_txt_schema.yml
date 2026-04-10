@@ -1,0 +1,162 @@
+version: 2
+
+# Standardised text models are materialised as views in dbt_dev_staging.
+# They apply nullif(lower(ltrim(rtrim(cast(... as varchar)))), '') to every
+# text column in the upstream staging model. Numeric columns are passed
+# through unchanged. No business logic, no joins, no surrogate keys at this layer.
+
+models:
+
+  - name: stg_us_bases_standardised_txt
+    description: "Text standardisation layer for stg_us_bases. All text columns lowercased, trimmed, and empty strings converted to null. Numeric columns passed through unchanged."
+    columns:
+      - name: country_state
+        description: "Standardised state or country code. Null if blank after trimming."
+      - name: site
+        description: "Standardised site name. Null if blank after trimming."
+      - name: component
+        description: "Standardised military component. Null if blank after trimming."
+      - name: name_nearest_city
+        description: "Standardised nearest city name. Null if blank after trimming."
+      - name: lat_long_sources
+        description: "Standardised lat/long source description. Null if blank after trimming."
+      - name: count_building_owned
+        description: "Count of owned buildings. Passed through from stg_us_bases."
+      - name: building_owned_sqft
+        description: "Owned buildings square footage. Passed through from stg_us_bases."
+      - name: count_bldgs_leased
+        description: "Count of leased buildings. Passed through from stg_us_bases."
+      - name: bldgs_leased_sqft
+        description: "Leased buildings square footage. Passed through from stg_us_bases."
+      - name: count_bldgs_other
+        description: "Count of other buildings. Passed through from stg_us_bases."
+      - name: bldgs_other_sqft
+        description: "Other buildings square footage. Passed through from stg_us_bases."
+      - name: acres_owned
+        description: "Owned acreage. Passed through from stg_us_bases."
+      - name: total_acres
+        description: "Total site area in acres. Passed through from stg_us_bases."
+      - name: plant_replacement_value_m
+        description: "Plant replacement value in USD millions. Passed through from stg_us_bases."
+      - name: latitude
+        description: "Site latitude. Passed through from stg_us_bases."
+      - name: longitude
+        description: "Site longitude. Passed through from stg_us_bases."
+
+  - name: stg_us_troops_standardised_txt
+    description: "Text standardisation layer for stg_us_troops. All text columns lowercased, trimmed, and empty strings converted to null. Numeric columns passed through unchanged."
+    columns:
+      - name: location
+        description: "Standardised location group (united states or overseas). Part of grain - Georgia, Guam, and Puerto Rico legitimately appear under both groups. Null if blank after trimming."
+      - name: duty_state_country
+        description: "Standardised duty state or country name. Null if blank after trimming."
+      - name: branch
+        description: "Standardised military branch. Null if blank after trimming."
+      - name: component_category
+        description: "Standardised component category (active duty, reserve, national guard, dod civilian). Null if blank after trimming."
+      - name: personnel_count
+        description: "Headcount of assigned personnel. Passed through from stg_us_troops."
+
+  - name: stg_gem_main_standardised_txt
+    description: "Text standardisation layer for stg_gem_main. All text columns lowercased, trimmed, and empty strings converted to null. Numeric columns passed through unchanged."
+    columns:
+      - name: unit_id
+        description: "Standardised GEM field identifier. Null if blank after trimming."
+      - name: unit_name
+        description: "Standardised field name. Null if blank after trimming."
+      - name: unit_name_local_script
+        description: "Standardised field name in local script. Null if blank after trimming."
+      - name: fuel_type
+        description: "Standardised fuel type. Null if blank after trimming."
+      - name: country_area
+        description: "Standardised country or area name. Null if blank after trimming."
+      - name: subnational_unit
+        description: "Standardised subnational unit. Null if blank after trimming."
+      - name: production_type
+        description: "Standardised production type. Null if blank after trimming."
+      - name: status
+        description: "Standardised operational status. Null if blank after trimming."
+      - name: status_detail
+        description: "Standardised status detail. Null if blank after trimming."
+      - name: operator
+        description: "Standardised field operator name. Null if blank after trimming."
+      - name: owners
+        description: "Standardised owners. Null if blank after trimming."
+      - name: parents
+        description: "Standardised parent companies. Null if blank after trimming."
+      - name: government_unit_id
+        description: "Standardised government unit identifier. Null if blank after trimming."
+      - name: wiki_url_project
+        description: "Standardised Wikipedia URL for the project. Null if blank after trimming."
+      - name: wiki_url_field
+        description: "Standardised Wikipedia URL for the field. Null if blank after trimming."
+      - name: name_other
+        description: "Standardised alternative field name. Null if blank after trimming."
+      - name: location_accuracy
+        description: "Standardised location accuracy descriptor. Null if blank after trimming."
+      - name: onshore_offshore
+        description: "Standardised onshore or offshore indicator. Null if blank after trimming."
+      - name: field_outline_wkt
+        description: "Standardised WKT geometry string for field outline. Null if blank after trimming."
+      - name: basin
+        description: "Standardised basin name. Null if blank after trimming."
+      - name: blocks
+        description: "Standardised block references. Null if blank after trimming."
+      - name: status_year
+        description: "Year the status was recorded. Passed through from stg_gem_main."
+      - name: discovery_year
+        description: "Year the field was discovered. Passed through from stg_gem_main."
+      - name: fid_year
+        description: "Year of final investment decision. Passed through from stg_gem_main."
+      - name: production_start_year
+        description: "Year production began. Passed through from stg_gem_main."
+      - name: latitude
+        description: "Field latitude. Passed through from stg_gem_main."
+      - name: longitude
+        description: "Field longitude. Passed through from stg_gem_main."
+
+  - name: stg_gem_production_standardised_txt
+    description: "Text standardisation layer for stg_gem_production. All text columns lowercased, trimmed, and empty strings converted to null. Numeric columns passed through unchanged."
+    columns:
+      - name: unit_id
+        description: "Standardised GEM field identifier. Null if blank after trimming."
+      - name: unit_name
+        description: "Standardised field name. Null if blank after trimming."
+      - name: country_area
+        description: "Standardised country or area name. Null if blank after trimming."
+      - name: fuel_description
+        description: "Standardised fuel description. Null if blank after trimming."
+      - name: units_original
+        description: "Standardised original units label. Null if blank after trimming."
+      - name: units_converted
+        description: "Standardised converted units label. Null if blank after trimming."
+      - name: quantity_original
+        description: "Production volume in original units. Passed through from stg_gem_production."
+      - name: quantity_converted
+        description: "Production volume in converted units. Passed through from stg_gem_production."
+      - name: data_year
+        description: "Year the production data relates to. Null set to 2026 and 2029 corrected to 2019 in stg_gem_production. Passed through from stg_gem_production."
+
+  - name: stg_gem_reserves_standardised_txt
+    description: "Text standardisation layer for stg_gem_reserves. All text columns lowercased, trimmed, and empty strings converted to null. Numeric columns passed through unchanged."
+    columns:
+      - name: unit_id
+        description: "Standardised GEM field identifier. Null if blank after trimming."
+      - name: unit_name
+        description: "Standardised field name. Null if blank after trimming."
+      - name: country_area
+        description: "Standardised country or area name. Null if blank after trimming."
+      - name: fuel_description
+        description: "Standardised fuel description. Null if blank after trimming."
+      - name: reserves_classification
+        description: "Standardised reserves classification. Null if blank after trimming."
+      - name: units
+        description: "Standardised original units label. Null if blank after trimming."
+      - name: units_converted
+        description: "Standardised converted units label. Null if blank after trimming."
+      - name: quantity
+        description: "Reserves volume in original units. Passed through from stg_gem_reserves."
+      - name: quantity_converted
+        description: "Reserves volume in converted units. Passed through from stg_gem_reserves."
+      - name: data_year
+        description: "Year the reserves data relates to. Null set to 2026 in stg_gem_reserves, resolving grain violations on L100000312399 and L100000312412. Passed through from stg_gem_reserves."

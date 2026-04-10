@@ -1,0 +1,38 @@
+version: 2
+
+# Region mapped models extend the canonical mapped models by adding a region
+# column via a left join to map_region. All columns from the upstream mapped
+# model are passed through unchanged. Region is added alongside.
+# A null region indicates a canonical value not present in map_region.
+
+models:
+
+  - name: int_us_bases_region_mapped
+    description: "Extends int_us_bases_mapped with a region column joined from map_region on country_state_canonical_mapped."
+    columns:
+      - name: region
+        description: "Geographic region derived from country_state_canonical_mapped. One of: us domestic, europe, middle east, indo-pacific, latin america, africa, other. Null if no mapping exists in map_region."
+
+  - name: int_us_troops_region_mapped
+    description: "Extends int_us_troops_mapped with a region column joined from map_region on duty_state_country_canonical_mapped. Georgia overseas is hardcoded to europe via a case statement using the location column."
+    columns:
+      - name: region
+        description: "Geographic region derived from duty_state_country_canonical_mapped. Georgia under overseas location group is mapped to europe. One of: us domestic, europe, middle east, indo-pacific, latin america, africa, other. Null if no mapping exists in map_region."
+
+  - name: int_gem_fields_region_mapped
+    description: "Extends int_gem_fields_mapped with a region column joined from map_region on country_area_canonical_mapped."
+    columns:
+      - name: region
+        description: "Geographic region derived from country_area_canonical_mapped. One of: us domestic, europe, middle east, indo-pacific, latin america, africa, other. Null if no mapping exists in map_region."
+
+  - name: int_gem_production_region_mapped
+    description: "Extends int_gem_production_mapped with a region column joined from map_region on country_area_canonical_mapped."
+    columns:
+      - name: region
+        description: "Geographic region derived from country_area_canonical_mapped. One of: us domestic, europe, middle east, indo-pacific, latin america, africa, other. Null if no mapping exists in map_region."
+
+  - name: int_gem_reserves_region_mapped
+    description: "Extends int_gem_reserves_mapped with a region column joined from map_region on country_area_canonical_mapped."
+    columns:
+      - name: region
+        description: "Geographic region derived from country_area_canonical_mapped. One of: us domestic, europe, middle east, indo-pacific, latin america, africa, other. Null if no mapping exists in map_region."

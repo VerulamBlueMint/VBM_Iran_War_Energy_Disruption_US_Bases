@@ -1,0 +1,7 @@
+version: 2
+
+analyses:
+  - name: profiling
+    description: "{{ doc('profiling_findings') }}"
+  - name: profiling_post_staging
+    description: "{{ doc('profiling_post_staging_findings') }}"
